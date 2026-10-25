@@ -1,0 +1,27 @@
+
+# Angular
+frontend/node_modules/
+frontend/dist/
+frontend/.angular/
+frontend/coverage/
+
+# Java y Spring Boot
+backend/backend/target/
+backend/backend/build/
+
+# Archivos privados
+.env
+.env.*
+!.env.example
+**/application-local.properties
+**/application-local.yml
+**/application-local.yaml
+
+# Archivos temporales
+*.log
+.DS_Store
+Thumbs.db
+
+# Respaldos de base de datos
+*.bak
+*.trn

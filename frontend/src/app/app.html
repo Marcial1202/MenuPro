@@ -1,0 +1,487 @@
+
+<div class="pagina-carta">
+  <!-- ENCABEZADO -->
+  <header class="barra-superior">
+    <a class="marca" href="#carta">
+      <span class="marca-icono">♨</span>
+      <span class="marca-texto">
+        <strong>Menu<span>Pro</span></strong>
+        <small>SABORES QUE CONECTAN</small>
+      </span>
+    </a>
+
+    <nav class="navegacion">
+      <a class="enlace-activo" href="#carta">Carta</a>
+      <a href="#administracion">Administración</a>
+      <a class="boton-gestionar" href="#administracion">
+        Gestionar menú <span>↗</span>
+      </a>
+    </nav>
+  </header>
+
+  <!-- PORTADA -->
+  <section class="portada" id="carta">
+    <div class="portada-contenido">
+      <span class="sobretitulo">UNA EXPERIENCIA GASTRONÓMICA</span>
+      <h1>Tradición peruana<br /><em>en cada plato.</em></h1>
+      <p>
+        Ingredientes seleccionados, sabores auténticos
+        y momentos que merecen ser compartidos.
+      </p>
+      <a class="boton-portada" href="#nuestros-platos">
+        DESCUBRIR LA CARTA <span>↓</span>
+      </a>
+    </div>
+
+    <div class="portada-foto">
+      <img
+        src="https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=1200&q=85"
+        alt="Presentación gastronómica"
+      />
+      <span class="sello-portada">Hecho con pasión</span>
+    </div>
+    <div class="portada-fondo"></div>
+  </section>
+
+  <!-- CATEGORÍAS INTERACTIVAS -->
+  <section class="seccion-categorias" id="nuestros-platos">
+    <div class="encabezado-seccion">
+      <span class="sobretitulo">DESCUBRE NUESTROS SABORES</span>
+      <h2>Una carta hecha para disfrutar</h2>
+      <p>Explora nuestra selección y encuentra tu próximo plato favorito.</p>
+    </div>
+
+    <div class="categorias-lista">
+      <button
+        type="button"
+        class="categoria-chip"
+        [class.categoria-activa]="categoriaSeleccionada === null"
+        [attr.aria-pressed]="categoriaSeleccionada === null"
+        (click)="filtrarPorCategoria(null)"
+      >
+        Todos los platos
+      </button>
+
+      <button
+        type="button"
+        class="categoria-chip"
+        *ngFor="let categoria of categorias"
+        [class.categoria-activa]="categoriaSeleccionada === categoria.id"
+        [attr.aria-pressed]="categoriaSeleccionada === categoria.id"
+        [disabled]="!categoria.activa"
+        (click)="filtrarPorCategoria(categoria.id)"
+      >
+        <span class="punto-dorado">✦</span>
+        {{ categoria.nombre }}
+      </button>
+    </div>
+  </section>
+
+  <!-- CARTA DE PRODUCTOS -->
+  <section class="seccion-productos">
+    <div class="titulo-productos">
+      <div>
+        <span class="sobretitulo">SELECCIÓN DE LA CASA</span>
+        <h2>
+          {{ categoriaSeleccionada === null
+            ? 'Nuestros platos'
+            : nombreCategoriaSeleccionada }}
+        </h2>
+      </div>
+
+      <span class="contador">
+        {{ productosFiltrados.length }}
+        {{ productosFiltrados.length === 1 ? 'propuesta' : 'propuestas' }}
+      </span>
+    </div>
+
+    <p
+      *ngIf="productosFiltrados.length === 0"
+      class="sin-productos"
+    >
+      No hay platos disponibles en esta categoría por el momento.
+    </p>
+
+    <div
+      class="rejilla-productos"
+      *ngIf="productosFiltrados.length > 0"
+    >
+      <article
+        class="producto-card"
+        *ngFor="let producto of productosFiltrados"
+      >
+        <div class="producto-imagen">
+          <img
+            *ngIf="producto.imagenUrl; else imagenAlternativa"
+            [src]="producto.imagenUrl"
+            [alt]="producto.nombre"
+            loading="lazy"
+          />
+
+          <ng-template #imagenAlternativa>
+            <div class="imagen-sin-foto">
+              <span>MenuPro</span>
+              <small>Sabores que conectan</small>
+            </div>
+          </ng-template>
+
+          <span class="disponibilidad">
+            <span class="punto-estado"></span>
+            Disponible
+          </span>
+        </div>
+
+        <div class="producto-informacion">
+          <span class="producto-categoria">
+            {{ producto.categoria?.nombre || 'Especialidad de la casa' }}
+          </span>
+
+          <h3>{{ producto.nombre }}</h3>
+
+          <p class="producto-descripcion">
+            {{ producto.descripcion || 'Una deliciosa propuesta de nuestra carta.' }}
+          </p>
+
+          <div class="producto-pie">
+            <span class="producto-precio">
+              S/ {{ producto.precio | number:'1.2-2' }}
+            </span>
+            <span class="adorno-dorado">✳</span>
+          </div>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <!-- PIE DE CARTA -->
+  <footer class="pie-carta">
+    <div class="pie-marca">Menu<span>Pro</span></div>
+    <p>Una experiencia para recordar, un sabor para volver.</p>
+    <span class="pie-derechos">SABORES QUE CONECTAN · MENÚ DIGITAL</span>
+  </footer>
+
+  <!-- ADMINISTRACIÓN -->
+  <section class="administracion" id="administracion">
+    <div class="administracion-encabezado">
+      <span class="sobretitulo">PANEL INTERNO</span>
+      <h2>Administración del menú</h2>
+      <p>Gestiona las categorías y los productos de tu restaurante.</p>
+    </div>
+
+    <p *ngIf="error" class="mensaje error">{{ error }}</p>
+    <p *ngIf="mensaje" class="mensaje exito">{{ mensaje }}</p>
+
+    <!-- CRUD DE CATEGORÍAS -->
+    <section class="tarjeta-admin">
+      <h3>Categorías</h3>
+
+      <form (ngSubmit)="crearCategoria()">
+        <label for="nombre">Nombre</label>
+        <input
+          id="nombre"
+          type="text"
+          name="nombre"
+          [(ngModel)]="nuevaCategoria.nombre"
+          placeholder="Ej. Bebidas"
+          maxlength="100"
+          required
+        />
+
+        <label for="descripcion">Descripción</label>
+        <input
+          id="descripcion"
+          type="text"
+          name="descripcion"
+          [(ngModel)]="nuevaCategoria.descripcion"
+          placeholder="Descripción de la categoría"
+          maxlength="255"
+        />
+
+        <label class="checkbox">
+          <input
+            type="checkbox"
+            name="activa"
+            [(ngModel)]="nuevaCategoria.activa"
+          />
+          Categoría activa
+        </label>
+
+        <button type="submit" [disabled]="guardando">
+          {{ guardando ? 'Guardando...' : 'Guardar categoría' }}
+        </button>
+      </form>
+
+      <div class="tabla-contenedor" *ngIf="categorias.length > 0">
+        <table>
+          <thead>
+            <tr>
+              <th>Nombre</th>
+              <th>Descripción</th>
+              <th>Estado</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let categoria of categorias">
+              <td>{{ categoria.nombre }}</td>
+              <td>{{ categoria.descripcion || 'Sin descripción' }}</td>
+              <td>
+                <span
+                  class="estado-etiqueta"
+                  [class.inactiva]="!categoria.activa"
+                >
+                  {{ categoria.activa ? 'Activa' : 'Inactiva' }}
+                </span>
+              </td>
+              <td class="acciones">
+                <button
+                  type="button"
+                  class="boton-editar"
+                  (click)="editarCategoria(categoria)"
+                >Editar</button>
+                <button
+                  type="button"
+                  class="boton-eliminar"
+                  (click)="eliminarCategoria(categoria)"
+                >Eliminar</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="form-edicion" *ngIf="editandoId !== null">
+        <h4>Editar categoría</h4>
+        <form (ngSubmit)="actualizarCategoria()">
+          <label for="nombreEditado">Nombre</label>
+          <input
+            id="nombreEditado"
+            name="nombreEditado"
+            [(ngModel)]="categoriaEditada.nombre"
+            required
+          />
+
+          <label for="descripcionEditada">Descripción</label>
+          <input
+            id="descripcionEditada"
+            name="descripcionEditada"
+            [(ngModel)]="categoriaEditada.descripcion"
+          />
+
+          <label class="checkbox">
+            <input
+              type="checkbox"
+              name="activaEditada"
+              [(ngModel)]="categoriaEditada.activa"
+            />
+            Categoría activa
+          </label>
+
+          <div class="acciones">
+            <button type="submit" [disabled]="guardando">
+              Guardar cambios
+            </button>
+            <button
+              type="button"
+              class="boton-cancelar"
+              (click)="cancelarEdicion()"
+            >Cancelar</button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- CRUD DE PRODUCTOS -->
+    <section class="tarjeta-admin">
+      <h3>Productos</h3>
+
+      <form (ngSubmit)="crearProducto()">
+        <label for="productoNombre">Nombre del producto</label>
+        <input
+          id="productoNombre"
+          name="productoNombre"
+          [(ngModel)]="nuevoProducto.nombre"
+          placeholder="Ej. Lomo saltado"
+          maxlength="150"
+          required
+        />
+
+        <label for="productoDescripcion">Descripción</label>
+        <textarea
+          id="productoDescripcion"
+          name="productoDescripcion"
+          [(ngModel)]="nuevoProducto.descripcion"
+          placeholder="Describe el plato"
+          maxlength="500"
+        ></textarea>
+
+        <label for="productoPrecio">Precio (S/)</label>
+        <input
+          id="productoPrecio"
+          type="number"
+          name="productoPrecio"
+          [(ngModel)]="nuevoProducto.precio"
+          min="0"
+          step="0.01"
+          required
+        />
+
+        <label for="productoImagen">URL de imagen</label>
+        <input
+          id="productoImagen"
+          type="url"
+          name="productoImagen"
+          [(ngModel)]="nuevoProducto.imagenUrl"
+          placeholder="https://..."
+        />
+
+        <label for="productoCategoria">Categoría</label>
+        <select
+          id="productoCategoria"
+          name="productoCategoria"
+          [(ngModel)]="nuevoProducto.categoriaId"
+          required
+        >
+          <option [ngValue]="null">Selecciona una categoría</option>
+          <option
+            *ngFor="let categoria of categorias"
+            [ngValue]="categoria.id"
+            [disabled]="!categoria.activa"
+          >
+            {{ categoria.nombre }}
+          </option>
+        </select>
+
+        <label class="checkbox">
+          <input
+            type="checkbox"
+            name="productoDisponible"
+            [(ngModel)]="nuevoProducto.disponible"
+          />
+          Producto disponible
+        </label>
+
+        <button type="submit" [disabled]="guardando">
+          {{ guardando ? 'Guardando...' : 'Guardar producto' }}
+        </button>
+      </form>
+
+      <div class="tabla-contenedor" *ngIf="productos.length > 0">
+        <table>
+          <thead>
+            <tr>
+              <th>Producto</th>
+              <th>Precio</th>
+              <th>Categoría</th>
+              <th>Estado</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let producto of productos">
+              <td>{{ producto.nombre }}</td>
+              <td>S/ {{ producto.precio | number:'1.2-2' }}</td>
+              <td>{{ producto.categoria?.nombre || 'Sin categoría' }}</td>
+              <td>
+                <span
+                  class="estado-etiqueta"
+                  [class.inactiva]="!producto.disponible"
+                >
+                  {{ producto.disponible ? 'Disponible' : 'No disponible' }}
+                </span>
+              </td>
+              <td class="acciones">
+                <button
+                  type="button"
+                  class="boton-editar"
+                  (click)="editarProducto(producto)"
+                >Editar</button>
+                <button
+                  type="button"
+                  class="boton-eliminar"
+                  (click)="eliminarProducto(producto)"
+                >Eliminar</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="form-edicion" *ngIf="editandoProductoId !== null">
+        <h4>Editar producto</h4>
+        <form (ngSubmit)="actualizarProducto()">
+          <label for="productoNombreEditado">Nombre</label>
+          <input
+            id="productoNombreEditado"
+            name="productoNombreEditado"
+            [(ngModel)]="productoEditado.nombre"
+            required
+          />
+
+          <label for="productoDescripcionEditada">Descripción</label>
+          <textarea
+            id="productoDescripcionEditada"
+            name="productoDescripcionEditada"
+            [(ngModel)]="productoEditado.descripcion"
+          ></textarea>
+
+          <label for="productoPrecioEditado">Precio (S/)</label>
+          <input
+            id="productoPrecioEditado"
+            type="number"
+            name="productoPrecioEditado"
+            [(ngModel)]="productoEditado.precio"
+            min="0"
+            step="0.01"
+            required
+          />
+
+          <label for="productoImagenEditada">URL de imagen</label>
+          <input
+            id="productoImagenEditada"
+            type="url"
+            name="productoImagenEditada"
+            [(ngModel)]="productoEditado.imagenUrl"
+          />
+
+          <label for="productoCategoriaEditada">Categoría</label>
+          <select
+            id="productoCategoriaEditada"
+            name="productoCategoriaEditada"
+            [(ngModel)]="productoEditado.categoriaId"
+            required
+          >
+            <option [ngValue]="null">Selecciona una categoría</option>
+            <option
+              *ngFor="let categoria of categorias"
+              [ngValue]="categoria.id"
+              [disabled]="!categoria.activa"
+            >
+              {{ categoria.nombre }}
+            </option>
+          </select>
+
+          <label class="checkbox">
+            <input
+              type="checkbox"
+              name="productoDisponibleEditado"
+              [(ngModel)]="productoEditado.disponible"
+            />
+            Producto disponible
+          </label>
+
+          <div class="acciones">
+            <button type="submit" [disabled]="guardando">
+              Guardar cambios
+            </button>
+            <button
+              type="button"
+              class="boton-cancelar"
+              (click)="cancelarEdicionProducto()"
+            >Cancelar</button>
+          </div>
+        </form>
+      </div>
+    </section>
+  </section>
+</div>
